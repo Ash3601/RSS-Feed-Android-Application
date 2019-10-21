@@ -1,4 +1,5 @@
 package com.example.exp6;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -37,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     ListView listView;
     List headlines;
     List links;
+    ProgressDialog nDialog;
     Map<String, String> rssLinks = new HashMap<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +53,17 @@ public class MainActivity extends AppCompatActivity {
         rssLinks.put("programming","https://codingconnect.net/feed");
     }
 
+    // Show Spinner
+    public void showSpinner() {
+        nDialog = new ProgressDialog(MainActivity.this);
+        nDialog.setMessage("Loading..");
+        nDialog.setTitle("Loading Feed");
+        nDialog.setIndeterminate(false);
+        nDialog.setCancelable(false);
+        nDialog.show();
+    }
+
+    /*
     // To display the box
     public void showMessage(String title, String message) {
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
@@ -64,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
         });
         builder.show();
     }
-
+*/
 
 
     @Override
@@ -111,9 +124,10 @@ public class MainActivity extends AppCompatActivity {
         // Constructor
         public MyAsyncTask(String url) {
             this.urlEntered = url;
-            showMessage("Loading Feed", "Your feed is getting loaded");
+//            showMessage("Loading Feed", "Your feed is getting loaded");
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                     WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            showSpinner();
         }
         public MyAsyncTask(String url, String urlName) {
             this.urlEntered = url;
@@ -157,10 +171,15 @@ public class MainActivity extends AppCompatActivity {
 
             } catch (MalformedURLException e) {
                 e.printStackTrace();
+                Log.i("url Parser", "offline");
             } catch (XmlPullParserException e) {
                 e.printStackTrace();
+                Log.i("url Parser 2", "offline");
+
             } catch (IOException e) {
                 e.printStackTrace();
+                Log.i("url Parser 3", "offline");
+
             }
             return null;
         }
@@ -168,6 +187,7 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(ArrayAdapter adapter) {
             populateListView();
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            nDialog.dismiss();
         }
     }
 
