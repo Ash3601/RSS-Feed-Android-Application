@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/gnews"
+        android:title="Google News"
+        android:showAsAction="ifRoom"/>
+    <item android:id="@+id/programming"
+        android:title="Programming"
+        app:showAsAction="never"/>
+    <item android:id="@+id/menu_exit"
+        android:title="Exit"
+        app:showAsAction="never"/>
+</menu>
