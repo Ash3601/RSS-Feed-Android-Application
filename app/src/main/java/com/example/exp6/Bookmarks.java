@@ -1,9 +1,11 @@
 package com.example.exp6;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -51,6 +53,28 @@ public class Bookmarks extends AppCompatActivity {
         return true;
 
     }
+    // Used for searching queries
+    private boolean showData(Cursor res) {
+//        res = myDb.getAllData();
+        headlines.clear();
+        links.clear();
+        if (res.getCount() == 0) {
+            // no data
+            Log.i("Error", "No data found!");
+            return false;
+        }
+        StringBuffer buffer = new StringBuffer();
+        while (res.moveToNext()) {
+            headlines.add(res.getString(0));
+            links.add(res.getString(1));
+
+            buffer.append("Id: " + res.getString(0) + "\n" + " First Name: " + res.getString(1) + "\n" + " Last Name: " + res.getString(2) + "\n" + " Marks: " + res.getString(3) + "\n");
+        }
+//        showMessage("Titel",buffer.toString());
+        Log.i(buffer.toString(), "bufferTest");
+        return true;
+
+    }
 
     public void showWebView() {
         webView  = new WebView(this);
@@ -77,6 +101,26 @@ public class Bookmarks extends AppCompatActivity {
 
     }
 
+    // To display the box
+    public void showMessage(String title, String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(Bookmarks.this);
+        builder.setCancelable(true);
+        builder.setTitle(title);
+        builder.setMessage(message);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                Toast.makeText(Bookmarks.this, "Closed",
+                        Toast.LENGTH_SHORT).show();
+                finish();
+                overridePendingTransition(0, 0);
+                startActivity(getIntent());
+                overridePendingTransition(0, 0);
+            }
+        });
+        builder.show();
+    }
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,12 +145,17 @@ public class Bookmarks extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                (Bookmarks.this).adapter.getFilter().filter(charSequence);
+//                (Bookmarks.this).adapter.getFilter().filter(charSequence);
+
 
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
+                Cursor cursor = myDb.queryData(filer.getText().toString().trim());
+                showData(cursor);
+                adapter = new ArrayAdapter<String>(Bookmarks.this, android.R.layout.simple_list_item_1, headlines);
+                listView.setAdapter(adapter);
 
             }
         });
@@ -139,7 +188,7 @@ public class Bookmarks extends AppCompatActivity {
 
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                String headline = (String)headlines.get(i);
+                String headline = headlines.get(i);
 //                String link = (String) links.get(i);
 //                String headline =
                 boolean isDeleted = myDb.deleteData(headline);
@@ -147,15 +196,21 @@ public class Bookmarks extends AppCompatActivity {
                 headlines.remove(i);
                 links.remove(i);
                 adapter.notifyDataSetChanged();
+//                boolean isDeleted = true;
                 if (isDeleted) {
 //                    boolean isText =
                     if (filer.getText().toString().equals("") == false) {
-                        filer.getText().clear();
-                        adapter.notifyDataSetChanged();
-                        Intent intent = getIntent();
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-                        startActivity(intent);
+                        Log.i("filer" + filer.getText().toString(), "filer");
+                        Cursor cursor = myDb.queryData(filer.getText().toString().trim());
+                        showData(cursor);
                         Toast.makeText(Bookmarks.this, "Deleted", Toast.LENGTH_SHORT).show();
+
+//                        filer.getText().clear();
+//                        adapter.notifyDataSetChanged();
+//                        Intent intent = getIntent();
+//                        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+//                        startActivity(intent);
+//                        Toast.makeText(Bookmarks.this, "Deleted", Toast.LENGTH_SHORT).show();
                     } else{
 
                         adapter.notifyDataSetChanged();

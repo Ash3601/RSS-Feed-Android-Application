@@ -65,6 +65,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     }
 
+    public Cursor queryData(String queryField) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor;
+        cursor=db.rawQuery("SELECT * FROM "+ TABLE_NAME + " WHERE "
+                + COL_1 + " LIKE '%"+queryField+"%'", null);
+        return cursor;
+    }
+
 
     // Check if the data is already present
     public boolean checkIsDataAlreadyInDBorNot(String headline) {

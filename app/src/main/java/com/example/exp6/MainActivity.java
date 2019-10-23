@@ -181,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
                 if (isNetworkConnected()) {
                     String[] urls = {"https://geeksforgeeks.org/feed", "https://codingconnect.net/feed"};
 //                    for (int i=0; i<2; i++) {
-                        new MyAsyncTask("https://codingconnect.net/feed");
+                        new MyAsyncTask(urls[0]).execute();
 //                        if (doneLoading) {
 //                            new MyAsyncTask(urls[1]);
 //                        }
