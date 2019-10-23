@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Paint;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -43,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private List headlines;
     private List links;
     private ProgressDialog nDialog;
-    private String platform = "";
+    private String platform = "Google News";
     Map<String, String> rssLinks = new HashMap<>();
     DatabaseHelper myDb;
     @Override
@@ -131,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
 
         switch (item.getItemId()) {
             case R.id.gnews:
-                platform = "Google";
+                platform = "Google News";
                 if (isNetworkConnected()) {
                     new MyAsyncTask("https://news.google.com/news/rss").execute();
 //                    boolean isInserted = myDb.insertData("testheadline" + Math.random(), "testlink", "google");
@@ -152,14 +153,13 @@ public class MainActivity extends AppCompatActivity {
                 platform = "Programming";
                 if (isNetworkConnected()) {
                     new MyAsyncTask("https://codingconnect.net/feed").execute();
-                myDb.insertData("Test2", "test", platform);
-                boolean isPresent = myDb.checkIsDataAlreadyInDBorNot("Test2");
-                if (isPresent)
-                    Log.i("Data present", "checkDataPre");
-                else {
-                    Log.i("Data not present", "checkDataPre");
-
-                }
+//                boolean isPresent = myDb.checkIsDataAlreadyInDBorNot("Test2");
+//                if (isPresent)
+//                    Log.i("Data present", "checkDataPre");
+//                else {
+//                    Log.i("Data not present", "checkDataPre");
+//
+//                }
         }
 //                    Cursor res = myDb.getAllData();
 //                if (res.getCount() == 0) {
@@ -274,14 +274,22 @@ public class MainActivity extends AppCompatActivity {
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
                 String headline = (String)headlines.get(i);
                 String link = (String) links.get(i);
+                boolean isInserted;
                 boolean isDataPresent = myDb.checkIsDataAlreadyInDBorNot(headline);
                 if (isDataPresent) {
-                    Toast.makeText(MainActivity.this, "Already bookmarked", Toast.LENGTH_SHORT);
-                    return false;
+                    Toast.makeText(MainActivity.this, "Already bookmarked", Toast.LENGTH_LONG).show();
+                    return true;
                 }
-                boolean isInserted = myDb.insertData(headline, link, platform);
+                isInserted = myDb.insertData(headline, link, platform);
                 Log.i("On item long clicked", "clickCheck");
-                return isInserted;
+                if (!isInserted) {
+                    Toast.makeText(MainActivity.this, "Already Added to Bookmark", Toast.LENGTH_LONG).show();
+                    return false;
+                } else {
+                    Toast.makeText(MainActivity.this, "Added to bookmark", Toast.LENGTH_LONG).show();
+                    return true;
+                }
+//                return isInserted;
 
             }
         });

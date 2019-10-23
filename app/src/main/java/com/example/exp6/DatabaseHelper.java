@@ -49,6 +49,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // Create SQLite Db instance
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
+        headline = headline.replace("'", "`");
         contentValues.put(COL_1, headline);
         contentValues.put(COL_2, link);
         contentValues.put(COL_3, platform);
@@ -84,9 +85,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 //        String Query = "SELECT * FROM '"+TABLE_NAME+"' WHERE headlines ='"+headline.trim()+"'";
 //        Cursor cursor = sqldb.rawQuery(Query, null);
         headline = headline.replace("'", "`");
-        Cursor cursor = sqldb.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE headlines = " + "'+headline+'", null);
+//        Cursor cursor = sqldb.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE headlines = " + "'+headline+'", null);
+        Cursor cursor = sqldb.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE headlines = " + "'" + headline + "'", null);
 
-//        Log.i(cursor.getCount() + "", "Databashelper");
+        Log.i("  " + cursor.getCount() + "", "Databashelper");
         if(cursor.getCount() <= 0){
             cursor.close();
             return false;

@@ -123,6 +123,7 @@ public class Bookmarks extends AppCompatActivity {
                 links.remove(i);
                 if (isDeleted) {
                     adapter.notifyDataSetChanged();
+                    Toast.makeText(Bookmarks.this, "Deleted", Toast.LENGTH_SHORT).show();
 //                    startActivity(Bookm/arks.this);
                 }
                 return isDeleted;
