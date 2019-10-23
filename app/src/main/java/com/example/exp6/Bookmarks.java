@@ -33,6 +33,7 @@ public class Bookmarks extends AppCompatActivity {
     private List<String> headlines;
     private List<String> links;
     private ArrayAdapter<String> adapter;
+    private EditText filer;
     private boolean showData() {
         Cursor res = myDb.getAllData();
         if (res.getCount() == 0) {
@@ -83,7 +84,7 @@ public class Bookmarks extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Bookmarks");
 
-        EditText filer = findViewById(R.id.edit_text_filter);
+        filer = findViewById(R.id.edit_text_filter);
         myDb = new DatabaseHelper(this);
         listView = findViewById(R.id.list_view_bookmarks);
         headlines = new ArrayList();
@@ -145,10 +146,22 @@ public class Bookmarks extends AppCompatActivity {
                 Log.i("On item long clicked data deleted", "deleteCheck");
                 headlines.remove(i);
                 links.remove(i);
+                adapter.notifyDataSetChanged();
                 if (isDeleted) {
-                    adapter.notifyDataSetChanged();
-                    Toast.makeText(Bookmarks.this, "Deleted", Toast.LENGTH_SHORT).show();
-//                    startActivity(Bookm/arks.this);
+//                    boolean isText =
+                    if (filer.getText().toString().equals("") == false) {
+                        filer.getText().clear();
+                        adapter.notifyDataSetChanged();
+                        Intent intent = getIntent();
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                        startActivity(intent);
+                        Toast.makeText(Bookmarks.this, "Deleted", Toast.LENGTH_SHORT).show();
+                    } else{
+
+                        adapter.notifyDataSetChanged();
+                        Toast.makeText(Bookmarks.this, "Deleted", Toast.LENGTH_SHORT).show();
+
+                    }
                 }
                 return isDeleted;
 

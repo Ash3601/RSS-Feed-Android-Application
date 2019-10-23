@@ -9,6 +9,8 @@ import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,6 +20,7 @@ import android.view.WindowManager;
 import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -45,8 +48,11 @@ public class MainActivity extends AppCompatActivity {
     private List links;
     private ProgressDialog nDialog;
     private String platform = "Google News";
+    private EditText mainActivityEditText;
     Map<String, String> rssLinks = new HashMap<>();
     DatabaseHelper myDb;
+    ArrayAdapter<String> adapter;
+    boolean doneLoading = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,6 +72,27 @@ public class MainActivity extends AppCompatActivity {
         }
 
         listView = findViewById(R.id.list_view);
+        // setting add text listener on edit text
+        mainActivityEditText = findViewById(R.id.main_activity_edit_text_filter);
+        mainActivityEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                (MainActivity.this).adapter.getFilter().filter(charSequence);
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                adapter.notifyDataSetChanged();
+            }
+        });
+
+
+
         rssLinks.put("move_review","http://www.rediff.com/rss/moviesreviewsrss.xml");
         rssLinks.put("rss_review","http://www.cinemablend.com/rss_review.php");
         rssLinks.put("gnews", "https://news.google.com/news/rss");
@@ -152,7 +179,23 @@ public class MainActivity extends AppCompatActivity {
             case R.id.programming:
                 platform = "Programming";
                 if (isNetworkConnected()) {
-                    new MyAsyncTask("https://codingconnect.net/feed").execute();
+                    String[] urls = {"https://geeksforgeeks.org/feed", "https://codingconnect.net/feed"};
+//                    for (int i=0; i<2; i++) {
+                        new MyAsyncTask("https://codingconnect.net/feed");
+//                        if (doneLoading) {
+//                            new MyAsyncTask(urls[1]);
+//                        }
+//                    }
+//                    new MyAsyncTask("https://geeksforgeeks.org/feed").execute();
+//                    try {
+//                        TimeUnit.SECONDS.sleep(3);
+//                    } catch (InterruptedException ie) {
+//                        Log.i(ie + "", "Interrupted Exception");
+//                    } catch (Exception e) {
+//                        Log.i(e + "", "Exception");
+//                    }
+//                    new MyAsyncTask("https://codingconnect.net/feed").execute();
+
 //                boolean isPresent = myDb.checkIsDataAlreadyInDBorNot("Test2");
 //                if (isPresent)
 //                    Log.i("Data present", "checkDataPre");
@@ -258,13 +301,14 @@ public class MainActivity extends AppCompatActivity {
 
         protected void onPostExecute(ArrayAdapter adapter) {
             populateListView();
+            doneLoading = true;
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
             nDialog.dismiss();
         }
     }
 
     private void populateListView() {
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1, headlines);
+        adapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1, headlines);
         listView.setAdapter(adapter);
 
         // on long press
