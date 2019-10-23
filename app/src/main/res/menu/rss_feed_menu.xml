@@ -7,6 +7,10 @@
     <item android:id="@+id/programming"
         android:title="Programming"
         app:showAsAction="never"/>
+    <item android:id="@+id/menu_bookmarks"
+        android:title="Bookmarks"
+        app:showAsAction="never"/>
+
     <item android:id="@+id/menu_exit"
         android:title="Exit"
         app:showAsAction="never"/>

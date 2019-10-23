@@ -1,7 +1,10 @@
 package com.example.exp6;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -33,24 +36,46 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
-    ListView listView;
-    List headlines;
-    List links;
-    ProgressDialog nDialog;
+    private ListView listView;
+    private List headlines;
+    private List links;
+    private ProgressDialog nDialog;
+    private String platform = "";
     Map<String, String> rssLinks = new HashMap<>();
+    DatabaseHelper myDb;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        new MyAsyncTask("https://news.google.com/news/rss").execute();
+        myDb = new DatabaseHelper(this);
+        if (isNetworkConnected())
+            new MyAsyncTask("https://news.google.com/news/rss").execute();
+        else {
+            showMessage("Error", "Internet not available.");
+            try {
+                TimeUnit.SECONDS.sleep(3);
+            } catch (InterruptedException ie) {
+                Log.i(ie + "", "Interrupted Exception");
+            } catch (Exception e) {
+                Log.i(e + "", "Exception");
+            }
+        }
 
         listView = findViewById(R.id.list_view);
         rssLinks.put("move_review","http://www.rediff.com/rss/moviesreviewsrss.xml");
         rssLinks.put("rss_review","http://www.cinemablend.com/rss_review.php");
         rssLinks.put("gnews", "https://news.google.com/news/rss");
         rssLinks.put("programming","https://codingconnect.net/feed");
+    }
+
+    // Network Connection Test
+    private boolean isNetworkConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();
     }
 
     // Show Spinner
@@ -63,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
         nDialog.show();
     }
 
-    /*
+
     // To display the box
     public void showMessage(String title, String message) {
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
@@ -73,11 +98,16 @@ public class MainActivity extends AppCompatActivity {
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 Toast.makeText(MainActivity.this, "Closed",
-                        Toast.LENGTH_SHORT).show();            }
+                        Toast.LENGTH_SHORT).show();
+                finish();
+                overridePendingTransition(0, 0);
+                startActivity(getIntent());
+                overridePendingTransition(0, 0);
+            }
         });
         builder.show();
     }
-*/
+
 
 
     @Override
@@ -101,14 +131,61 @@ public class MainActivity extends AppCompatActivity {
 
         switch (item.getItemId()) {
             case R.id.gnews:
-                Toast.makeText(this, "Opening Google News", Toast.LENGTH_LONG);
-                new MyAsyncTask("https://news.google.com/news/rss").execute();
+                platform = "Google";
+                if (isNetworkConnected()) {
+                    new MyAsyncTask("https://news.google.com/news/rss").execute();
+//                    boolean isInserted = myDb.insertData("testheadline" + Math.random(), "testlink", "google");
+//                    if (isInserted) {
+//                        Toast.makeText(this, "Data Inserted No worried", Toast.LENGTH_LONG);
+//                        Log.i("Data inserted", "Database");
+//                    } else {
+//                        Toast.makeText(this, "Data not Inserted worried", Toast.LENGTH_LONG);
+//                        Log.i("Data not inserted", "Database");
+
+//                    }
+                } else {
+                    showMessage("Error", "Internet not available.");
+                }
                 break;
 
             case R.id.programming:
-                Toast.makeText(this, "Opening Programming", Toast.LENGTH_LONG);
-                new MyAsyncTask("https://codingconnect.net/feed").execute();
+                platform = "Programming";
+                if (isNetworkConnected()) {
+                    new MyAsyncTask("https://codingconnect.net/feed").execute();
+                myDb.insertData("Test2", "test", platform);
+                boolean isPresent = myDb.checkIsDataAlreadyInDBorNot("Test2");
+                if (isPresent)
+                    Log.i("Data present", "checkDataPre");
+                else {
+                    Log.i("Data not present", "checkDataPre");
+
+                }
+        }
+//                    Cursor res = myDb.getAllData();
+//                if (res.getCount() == 0) {
+//                    // no data
+//                    showMessage("Error", "No data found!");
+//                    return false;
+//                }
+//                StringBuffer buffer = new StringBuffer();
+//                while (res.moveToNext()) {
+//                    buffer.append("Id: " + res.getString(0) + "\n" + " First Name: " + res.getString(1) + "\n" + " Last Name: " + res.getString(2) + "\n" + " Marks: " + res.getString(3) + "\n");
+//                }
+//
+//                // Show all the data
+//                showMessage("Data", buffer.toString());
+//
+                else {
+                    showMessage("Error", "Internet not available.");
+                }
+
                 break;
+            case R.id.menu_bookmarks:
+                Log.i("Showing Bookmarks", "bookmarkstest");
+                Intent bookmarkActivityIntent = new Intent(MainActivity.this, Bookmarks.class);
+                startActivity(bookmarkActivityIntent);
+                break;
+
             case R.id.menu_exit:
                 Toast.makeText(this, "Exiting", Toast.LENGTH_LONG);
                 finish();
@@ -124,14 +201,9 @@ public class MainActivity extends AppCompatActivity {
         // Constructor
         public MyAsyncTask(String url) {
             this.urlEntered = url;
-//            showMessage("Loading Feed", "Your feed is getting loaded");
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                     WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
             showSpinner();
-        }
-        public MyAsyncTask(String url, String urlName) {
-            this.urlEntered = url;
-            this.urlName = urlName;
         }
 
 
@@ -195,6 +267,26 @@ public class MainActivity extends AppCompatActivity {
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1, headlines);
         listView.setAdapter(adapter);
 
+        // on long press
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+                String headline = (String)headlines.get(i);
+                String link = (String) links.get(i);
+                boolean isDataPresent = myDb.checkIsDataAlreadyInDBorNot(headline);
+                if (isDataPresent) {
+                    Toast.makeText(MainActivity.this, "Already bookmarked", Toast.LENGTH_SHORT);
+                    return false;
+                }
+                boolean isInserted = myDb.insertData(headline, link, platform);
+                Log.i("On item long clicked", "clickCheck");
+                return isInserted;
+
+            }
+        });
+
+        // on press
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
