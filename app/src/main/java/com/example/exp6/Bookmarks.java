@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.webkit.WebResourceError;
@@ -16,6 +18,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -29,7 +32,7 @@ public class Bookmarks extends AppCompatActivity {
     private ListView listView;
     private List<String> headlines;
     private List<String> links;
-
+    private ArrayAdapter<String> adapter;
     private boolean showData() {
         Cursor res = myDb.getAllData();
         if (res.getCount() == 0) {
@@ -80,13 +83,34 @@ public class Bookmarks extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Bookmarks");
 
+        EditText filer = findViewById(R.id.edit_text_filter);
         myDb = new DatabaseHelper(this);
         listView = findViewById(R.id.list_view_bookmarks);
         headlines = new ArrayList();
         links = new ArrayList();
         showData();
-        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(Bookmarks.this, android.R.layout.simple_list_item_1, headlines);
+         adapter = new ArrayAdapter<String>(Bookmarks.this, android.R.layout.simple_list_item_1, headlines);
         listView.setAdapter(adapter);
+
+        // setting add text listener on edit text
+        filer.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                (Bookmarks.this).adapter.getFilter().filter(charSequence);
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+
+
         // on press
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
