@@ -1,7 +1,5 @@
 package com.example.exp6;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.os.Bundle;
@@ -10,6 +8,8 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 public class WebPageActivity extends AppCompatActivity {
 
@@ -21,7 +21,7 @@ public class WebPageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_web_view);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("RSS Feed");
-        webView  = new WebView(this);
+        webView = new WebView(this);
 
         webView.getSettings().setJavaScriptEnabled(true); // enable javascript
 
@@ -33,6 +33,7 @@ public class WebPageActivity extends AppCompatActivity {
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
                 Toast.makeText(activity, description, Toast.LENGTH_SHORT).show();
             }
+
             @TargetApi(android.os.Build.VERSION_CODES.M)
             @Override
             public void onReceivedError(WebView view, WebResourceRequest req, WebResourceError rerr) {
@@ -41,7 +42,7 @@ public class WebPageActivity extends AppCompatActivity {
             }
         });
 
-        webView .loadUrl(String.valueOf(getIntent().getData()));
+        webView.loadUrl(String.valueOf(getIntent().getData()));
         setContentView(webView);
     }
 }

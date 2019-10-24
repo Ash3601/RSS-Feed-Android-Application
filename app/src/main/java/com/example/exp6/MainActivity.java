@@ -1,10 +1,9 @@
 package com.example.exp6;
+
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
-import android.graphics.Paint;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -17,7 +16,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -34,13 +32,10 @@ import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Array;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
@@ -50,16 +45,15 @@ public class MainActivity extends AppCompatActivity {
     private ProgressDialog nDialog;
     private String platform = "News";
     private EditText mainActivityEditText;
-    Map<String, String> rssLinks = new HashMap<>();
     DatabaseHelper myDb;
     ArrayAdapter<String> adapter;
     boolean doneLoading = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         myDb = new DatabaseHelper(this);
-//        myDb.removeAllEntries();
         if (isNetworkConnected())
             new MyAsyncTask("https://news.google.com/news/rss").execute();
         else {
@@ -74,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         listView = findViewById(R.id.list_view);
+
         // setting add text listener on edit text
         mainActivityEditText = findViewById(R.id.main_activity_edit_text_filter);
         mainActivityEditText.addTextChangedListener(new TextWatcher() {
@@ -83,27 +78,6 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i0, int i1, int i2) {
-//                (MainActivity.this).adapter.getFilter().filter(charSequence);
-//                adapter.notifyDataSetChanged();
-//                List<String> tmpList = new ArrayList<>();
-//                String input = mainActivityEditText.getText().toString();
-//                for (int i=0; i<headlines.size(); i++) {
-//                    String temp = (String)headlines.get(i);
-//                    if (temp.toLowerCase().contains(input.toLowerCase())) {
-//                        tmpList.add(temp);
-//                    }
-//                }
-//                headlines.clear();
-//                links.clear();
-//                adapter.notifyDataSetChanged();
-//                headlines = tmpList;
-//
-//                adapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, tmpList);
-//                listView.setAdapter(adapter);
-//                adapter.notifyDataSetChanged();
-//                Log.i("In text change class", "textchange");
-//
-
             }
 
             @Override
@@ -111,8 +85,8 @@ public class MainActivity extends AppCompatActivity {
                 List<String> tmpList = new ArrayList<>();
                 List<String> tmpList2 = new ArrayList<>();
                 String input = mainActivityEditText.getText().toString();
-                for (int i=0; i<headlines.size(); i++) {
-                    String temp = (String)headlines.get(i);
+                for (int i = 0; i < headlines.size(); i++) {
+                    String temp = (String) headlines.get(i);
                     String temp2 = (String) links.get(i);
                     if (temp.toLowerCase().contains(input.toLowerCase())) {
                         tmpList.add(temp);
@@ -122,33 +96,19 @@ public class MainActivity extends AppCompatActivity {
                 if (input.equals("") == true) {
                     listView.setAdapter(adapter);
                     adapter.notifyDataSetChanged();
-//                    overridePendingTransition(0, 0);
-//                    startActivity(getIntent());
-//                    overridePendingTransition(0, 0);
                     return;
                 }
-//                headlines.clear();
-//                links.clear();
-//                adapter.notifyDataSetChanged();
                 headlines = tmpList;
                 links = tmpList2;
 
                 ArrayAdapter<String> myAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, tmpList);
                 listView.setAdapter(myAdapter);
                 myAdapter.notifyDataSetChanged();
-                Log.i("In text changed class", "textchange");
-
 
 
             }
         });
 
-
-
-        rssLinks.put("move_review","http://www.rediff.com/rss/moviesreviewsrss.xml");
-        rssLinks.put("rss_review","http://www.cinemablend.com/rss_review.php");
-        rssLinks.put("gnews", "https://news.google.com/news/rss");
-        rssLinks.put("programming","https://codingconnect.net/feed");
     }
 
     // Network Connection Test
@@ -189,7 +149,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -214,15 +173,6 @@ public class MainActivity extends AppCompatActivity {
                 platform = "News";
                 if (isNetworkConnected()) {
                     new MyAsyncTask("https://news.google.com/news/rss").execute();
-//                    boolean isInserted = myDb.insertData("testheadline" + Math.random(), "testlink", "google");
-//                    if (isInserted) {
-//                        Toast.makeText(this, "Data Inserted No worried", Toast.LENGTH_LONG);
-//                        Log.i("Data inserted", "Database");
-//                    } else {
-//                        Toast.makeText(this, "Data not Inserted worried", Toast.LENGTH_LONG);
-//                        Log.i("Data not inserted", "Database");
-
-//                    }
                 } else {
                     showMessage("Error", "Internet not available.");
                 }
@@ -232,45 +182,8 @@ public class MainActivity extends AppCompatActivity {
                 platform = "Programming";
                 if (isNetworkConnected()) {
                     String[] urls = {"https://geeksforgeeks.org/feed", "https://codingconnect.net/feed"};
-//                    for (int i=0; i<2; i++) {
-                        new MyAsyncTask(urls[0]).execute();
-//                        if (doneLoading) {
-//                            new MyAsyncTask(urls[1]);
-//                        }
-//                    }
-//                    new MyAsyncTask("https://geeksforgeeks.org/feed").execute();
-//                    try {
-//                        TimeUnit.SECONDS.sleep(3);
-//                    } catch (InterruptedException ie) {
-//                        Log.i(ie + "", "Interrupted Exception");
-//                    } catch (Exception e) {
-//                        Log.i(e + "", "Exception");
-//                    }
-//                    new MyAsyncTask("https://codingconnect.net/feed").execute();
-
-//                boolean isPresent = myDb.checkIsDataAlreadyInDBorNot("Test2");
-//                if (isPresent)
-//                    Log.i("Data present", "checkDataPre");
-//                else {
-//                    Log.i("Data not present", "checkDataPre");
-//
-//                }
-        }
-//                    Cursor res = myDb.getAllData();
-//                if (res.getCount() == 0) {
-//                    // no data
-//                    showMessage("Error", "No data found!");
-//                    return false;
-//                }
-//                StringBuffer buffer = new StringBuffer();
-//                while (res.moveToNext()) {
-//                    buffer.append("Id: " + res.getString(0) + "\n" + " First Name: " + res.getString(1) + "\n" + " Last Name: " + res.getString(2) + "\n" + " Marks: " + res.getString(3) + "\n");
-//                }
-//
-//                // Show all the data
-//                showMessage("Data", buffer.toString());
-//
-                else {
+                    new MyAsyncTask(urls[0]).execute();
+                } else {
                     showMessage("Error", "Internet not available.");
                 }
 
@@ -291,7 +204,6 @@ public class MainActivity extends AppCompatActivity {
     class MyAsyncTask extends AsyncTask<Object, Void, ArrayAdapter> {
 
         String urlEntered;
-        String urlName = null;
 
         // Constructor
         public MyAsyncTask(String url) {
@@ -368,7 +280,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                String headline = (String)headlines.get(i);
+                String headline = (String) headlines.get(i);
                 String link = (String) links.get(i);
                 boolean isInserted;
                 boolean isDataPresent = myDb.checkIsDataAlreadyInDBorNot(headline);
@@ -382,14 +294,10 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "Already Added to Bookmark", Toast.LENGTH_LONG).show();
                     return false;
                 } else {
-//                    showMessage("Testing",headlines.get(i) + "");
-//                    Log.i(headlines.get(i) + "", "addbcheck");
-//                    Toast.makeText(MainActivity.this, "Added to bookmark", Toast.LENGTH_LONG).show();
-                    Toast.makeText(MainActivity.this, headline, Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, "Added", Toast.LENGTH_LONG).show();
 
                     return true;
                 }
-//                return isInserted;
 
             }
         });

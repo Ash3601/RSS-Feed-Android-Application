@@ -1,11 +1,6 @@
 package com.example.exp6;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.annotation.TargetApi;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -30,43 +25,46 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class Bookmarks extends AppCompatActivity {
 
-    DatabaseHelper myDb;
-    WebView webView;
+    private DatabaseHelper myDb;
+    private WebView webView;
     private ListView listView;
     private List<String> headlines;
     private List<String> links;
     private ArrayAdapter<String> adapter;
     private EditText filer;
-//    private ActionBar actionBar = null;
+    private boolean confirmation = false;
+
     private boolean showData() {
         Cursor res = myDb.getAllData();
         if (res.getCount() == 0) {
             // no data
+            Toast.makeText(this, "No data found!", Toast.LENGTH_SHORT);
             Log.i("Error", "No data found!");
             return false;
         }
-        StringBuffer buffer = new StringBuffer();
         while (res.moveToNext()) {
             headlines.add(res.getString(0));
             links.add(res.getString(1));
-
-//            buffer.append("Id: " + res.getString(0) + "\n" + " First Name: " + res.getString(1) + "\n" + " Last Name: " + res.getString(2) + "\n" + " Marks: " + res.getString(3) + "\n");
         }
         return true;
-
     }
+
     // Used for searching queries
     private boolean showData(Cursor res) {
-//        res = myDb.getAllData();
         headlines.clear();
         links.clear();
         if (res.getCount() == 0) {
             // no data
+            Toast.makeText(this, "No data found!", Toast.LENGTH_SHORT);
             Log.i("Error", "No data found!");
             return false;
         }
@@ -74,18 +72,12 @@ public class Bookmarks extends AppCompatActivity {
         while (res.moveToNext()) {
             headlines.add(res.getString(0));
             links.add(res.getString(1));
-
-            buffer.append("Id: " + res.getString(0) + "\n" + " First Name: " + res.getString(1) + "\n" + " Last Name: " + res.getString(2) + "\n" + " Marks: " + res.getString(3) + "\n");
         }
-//        showMessage("Titel",buffer.toString());
-        Log.i(buffer.toString(), "bufferTest");
         return true;
-
     }
 
 
     private boolean showDataOrderBy(Cursor res) {
-//        res = myDb.getAllData();
         if (res.getCount() == 0) {
             // no data
             Toast.makeText(this, "No data present", Toast.LENGTH_SHORT).show();
@@ -94,22 +86,16 @@ public class Bookmarks extends AppCompatActivity {
         }
         headlines.clear();
         links.clear();
-        StringBuffer buffer = new StringBuffer();
         while (res.moveToNext()) {
             headlines.add(res.getString(0));
             links.add(res.getString(1));
-
-            buffer.append("Id: " + res.getString(0) + "\n" + " First Name: " + res.getString(1) + "\n" + " Last Name: " + res.getString(2) + "\n" + " Marks: " + res.getString(3) + "\n");
         }
-//        showMessage("Titel",buffer.toString());
-        Log.i(buffer.toString(), "bufferTest");
         return true;
-
     }
 
 
     public void showWebView() {
-        webView  = new WebView(this);
+        webView = new WebView(this);
 
         webView.getSettings().setJavaScriptEnabled(true); // enable javascript
 
@@ -121,6 +107,7 @@ public class Bookmarks extends AppCompatActivity {
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
                 Toast.makeText(activity, description, Toast.LENGTH_SHORT).show();
             }
+
             @TargetApi(android.os.Build.VERSION_CODES.M)
             @Override
             public void onReceivedError(WebView view, WebResourceRequest req, WebResourceError rerr) {
@@ -129,27 +116,8 @@ public class Bookmarks extends AppCompatActivity {
             }
         });
 
-        webView .loadUrl(String.valueOf(getIntent().getData()));
+        webView.loadUrl(String.valueOf(getIntent().getData()));
 
-    }
-
-    // To display the box
-    public void showMessage(String title, String message) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(Bookmarks.this);
-        builder.setCancelable(true);
-        builder.setTitle(title);
-        builder.setMessage(message);
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                Toast.makeText(Bookmarks.this, "Closed",
-                        Toast.LENGTH_SHORT).show();
-                finish();
-                overridePendingTransition(0, 0);
-                startActivity(getIntent());
-                overridePendingTransition(0, 0);
-            }
-        });
-        builder.show();
     }
 
 
@@ -157,10 +125,6 @@ public class Bookmarks extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bookmarks);
-//        actionBar = getActionBar();
-//        actionBar.setDisplayHomeAsUpEnabled(true);
-//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Bookmarks");
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 
@@ -170,7 +134,7 @@ public class Bookmarks extends AppCompatActivity {
         headlines = new ArrayList();
         links = new ArrayList();
         showData();
-         adapter = new ArrayAdapter<>(Bookmarks.this, android.R.layout.simple_list_item_1, headlines);
+        adapter = new ArrayAdapter<>(Bookmarks.this, android.R.layout.simple_list_item_1, headlines);
         listView.setAdapter(adapter);
 
         // setting add text listener on edit text
@@ -181,7 +145,6 @@ public class Bookmarks extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-//                (Bookmarks.this).adapter.getFilter().filter(charSequence);
 
 
             }
@@ -197,23 +160,12 @@ public class Bookmarks extends AppCompatActivity {
         });
 
 
-//        // on press
-//        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-//                Intent intent = new Intent(Bookmarks.this, WebPageActivity.class);
-//                Uri uri = Uri.parse((links.get(position)).toString());
-//                intent.setData(uri);
-//                startActivity(intent);
-//            }
-//        });
-
         // on press
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 Intent intent = new Intent(Bookmarks.this, WebPageActivity.class);
-                Uri uri = Uri.parse((links.get(position)).toString());
+                Uri uri = Uri.parse((links.get(position)));
                 intent.setData(uri);
                 startActivity(intent);
             }
@@ -225,29 +177,17 @@ public class Bookmarks extends AppCompatActivity {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
                 String headline = headlines.get(i);
-//                String link = (String) links.get(i);
-//                String headline =
                 boolean isDeleted = myDb.deleteData(headline);
-                Log.i("On item long clicked data deleted", "deleteCheck");
                 headlines.remove(i);
                 links.remove(i);
                 adapter.notifyDataSetChanged();
-//                boolean isDeleted = true;
                 if (isDeleted) {
-//                    boolean isText =
                     if (filer.getText().toString().equals("") == false) {
-                        Log.i("filer" + filer.getText().toString(), "filer");
                         Cursor cursor = myDb.queryData(filer.getText().toString().trim());
                         showData(cursor);
                         Toast.makeText(Bookmarks.this, "Deleted", Toast.LENGTH_SHORT).show();
 
-//                        filer.getText().clear();
-//                        adapter.notifyDataSetChanged();
-//                        Intent intent = getIntent();
-//                        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-//                        startActivity(intent);
-//                        Toast.makeText(Bookmarks.this, "Deleted", Toast.LENGTH_SHORT).show();
-                    } else{
+                    } else {
 
                         adapter.notifyDataSetChanged();
                         Toast.makeText(Bookmarks.this, "Deleted", Toast.LENGTH_SHORT).show();
@@ -260,13 +200,15 @@ public class Bookmarks extends AppCompatActivity {
         });
 
     }
+
     @Override
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
     }
 
-    public void askConfirmation(String title, String msg,final String result,final Context c) {
+    public boolean askConfirmation(String title, String msg, final String result, final Context c) {
+
         new AlertDialog.Builder(this)
                 .setTitle(title)
                 .setMessage(msg)
@@ -274,9 +216,22 @@ public class Bookmarks extends AppCompatActivity {
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
                     public void onClick(DialogInterface dialog, int whichButton) {
+                        confirmation = true;
+                        myDb.removeAllEntries();
+                        headlines.clear();
+                        links.clear();
+                        adapter.notifyDataSetChanged();
                         Toast.makeText(c, result, Toast.LENGTH_SHORT).show();
-                    }})
-                .setNegativeButton(android.R.string.no, null).show();
+                    }
+                })
+                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        confirmation = false;
+                        Toast.makeText(c, "Cancelled", Toast.LENGTH_SHORT).show();
+                    }
+
+                }).show();
+        return confirmation;
     }
 
     @Override
@@ -289,14 +244,10 @@ public class Bookmarks extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 
-        Cursor cursor = null;
+        Cursor cursor;
         switch (item.getItemId()) {
             case R.id.delete_all:
-                askConfirmation("Confirm", "Are you really want to delete all bookmarks","All entries deleted.", Bookmarks.this);
-                myDb.removeAllEntries();
-                headlines.clear();
-                links.clear();
-                adapter.notifyDataSetChanged();
+                askConfirmation("Confirm", "Are you really want to delete all bookmarks", "All entries deleted.", Bookmarks.this);
                 break;
 
             case R.id.order_by_news:
