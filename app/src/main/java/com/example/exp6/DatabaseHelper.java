@@ -73,6 +73,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return cursor;
     }
 
+    // Delete all the entries from the database
+    public void removeAllEntries() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("DELETE FROM "+ TABLE_NAME);
+        Log.i("All entries deleted", "removeAllEntries");
+    }
+
 
     // Check if the data is already present
     public boolean checkIsDataAlreadyInDBorNot(String headline) {

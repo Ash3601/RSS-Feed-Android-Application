@@ -34,6 +34,7 @@ import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -58,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         myDb = new DatabaseHelper(this);
+//        myDb.removeAllEntries();
         if (isNetworkConnected())
             new MyAsyncTask("https://news.google.com/news/rss").execute();
         else {
@@ -80,14 +82,64 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                (MainActivity.this).adapter.getFilter().filter(charSequence);
-                adapter.notifyDataSetChanged();
+            public void onTextChanged(CharSequence charSequence, int i0, int i1, int i2) {
+//                (MainActivity.this).adapter.getFilter().filter(charSequence);
+//                adapter.notifyDataSetChanged();
+//                List<String> tmpList = new ArrayList<>();
+//                String input = mainActivityEditText.getText().toString();
+//                for (int i=0; i<headlines.size(); i++) {
+//                    String temp = (String)headlines.get(i);
+//                    if (temp.toLowerCase().contains(input.toLowerCase())) {
+//                        tmpList.add(temp);
+//                    }
+//                }
+//                headlines.clear();
+//                links.clear();
+//                adapter.notifyDataSetChanged();
+//                headlines = tmpList;
+//
+//                adapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, tmpList);
+//                listView.setAdapter(adapter);
+//                adapter.notifyDataSetChanged();
+//                Log.i("In text change class", "textchange");
+//
+
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
-                adapter.notifyDataSetChanged();
+                List<String> tmpList = new ArrayList<>();
+                List<String> tmpList2 = new ArrayList<>();
+                String input = mainActivityEditText.getText().toString();
+                for (int i=0; i<headlines.size(); i++) {
+                    String temp = (String)headlines.get(i);
+                    String temp2 = (String) links.get(i);
+                    if (temp.toLowerCase().contains(input.toLowerCase())) {
+                        tmpList.add(temp);
+                        tmpList2.add(temp2);
+                    }
+                }
+                if (input.equals("") == true) {
+                    listView.setAdapter(adapter);
+                    adapter.notifyDataSetChanged();
+//                    overridePendingTransition(0, 0);
+//                    startActivity(getIntent());
+//                    overridePendingTransition(0, 0);
+                    return;
+                }
+//                headlines.clear();
+//                links.clear();
+//                adapter.notifyDataSetChanged();
+                headlines = tmpList;
+                links = tmpList2;
+
+                ArrayAdapter<String> myAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, tmpList);
+                listView.setAdapter(myAdapter);
+                myAdapter.notifyDataSetChanged();
+                Log.i("In text changed class", "textchange");
+
+
+
             }
         });
 
@@ -330,7 +382,11 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "Already Added to Bookmark", Toast.LENGTH_LONG).show();
                     return false;
                 } else {
-                    Toast.makeText(MainActivity.this, "Added to bookmark", Toast.LENGTH_LONG).show();
+//                    showMessage("Testing",headlines.get(i) + "");
+//                    Log.i(headlines.get(i) + "", "addbcheck");
+//                    Toast.makeText(MainActivity.this, "Added to bookmark", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, headline, Toast.LENGTH_LONG).show();
+
                     return true;
                 }
 //                return isInserted;
