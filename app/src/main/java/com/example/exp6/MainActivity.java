@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private List headlines;
     private List links;
     private ProgressDialog nDialog;
-    private String platform = "Google News";
+    private String platform = "News";
     private EditText mainActivityEditText;
     Map<String, String> rssLinks = new HashMap<>();
     DatabaseHelper myDb;
@@ -211,7 +211,7 @@ public class MainActivity extends AppCompatActivity {
 
         switch (item.getItemId()) {
             case R.id.gnews:
-                platform = "Google News";
+                platform = "News";
                 if (isNetworkConnected()) {
                     new MyAsyncTask("https://news.google.com/news/rss").execute();
 //                    boolean isInserted = myDb.insertData("testheadline" + Math.random(), "testlink", "google");

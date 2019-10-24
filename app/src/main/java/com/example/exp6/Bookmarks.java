@@ -1,10 +1,13 @@
 package com.example.exp6;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.TargetApi;
+import android.app.ActionBar;
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -13,6 +16,9 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -36,6 +42,7 @@ public class Bookmarks extends AppCompatActivity {
     private List<String> links;
     private ArrayAdapter<String> adapter;
     private EditText filer;
+//    private ActionBar actionBar = null;
     private boolean showData() {
         Cursor res = myDb.getAllData();
         if (res.getCount() == 0) {
@@ -75,6 +82,31 @@ public class Bookmarks extends AppCompatActivity {
         return true;
 
     }
+
+
+    private boolean showDataOrderBy(Cursor res) {
+//        res = myDb.getAllData();
+        if (res.getCount() == 0) {
+            // no data
+            Toast.makeText(this, "No data present", Toast.LENGTH_SHORT).show();
+            Log.i("Error", "No data found!");
+            return false;
+        }
+        headlines.clear();
+        links.clear();
+        StringBuffer buffer = new StringBuffer();
+        while (res.moveToNext()) {
+            headlines.add(res.getString(0));
+            links.add(res.getString(1));
+
+            buffer.append("Id: " + res.getString(0) + "\n" + " First Name: " + res.getString(1) + "\n" + " Last Name: " + res.getString(2) + "\n" + " Marks: " + res.getString(3) + "\n");
+        }
+//        showMessage("Titel",buffer.toString());
+        Log.i(buffer.toString(), "bufferTest");
+        return true;
+
+    }
+
 
     public void showWebView() {
         webView  = new WebView(this);
@@ -125,8 +157,12 @@ public class Bookmarks extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bookmarks);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+//        actionBar = getActionBar();
+//        actionBar.setDisplayHomeAsUpEnabled(true);
+//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Bookmarks");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 
         filer = findViewById(R.id.edit_text_filter);
         myDb = new DatabaseHelper(this);
@@ -134,7 +170,7 @@ public class Bookmarks extends AppCompatActivity {
         headlines = new ArrayList();
         links = new ArrayList();
         showData();
-         adapter = new ArrayAdapter<String>(Bookmarks.this, android.R.layout.simple_list_item_1, headlines);
+         adapter = new ArrayAdapter<>(Bookmarks.this, android.R.layout.simple_list_item_1, headlines);
         listView.setAdapter(adapter);
 
         // setting add text listener on edit text
@@ -161,16 +197,16 @@ public class Bookmarks extends AppCompatActivity {
         });
 
 
-        // on press
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                Intent intent = new Intent(Bookmarks.this, WebPageActivity.class);
-                Uri uri = Uri.parse((links.get(position)).toString());
-                intent.setData(uri);
-                startActivity(intent);
-            }
-        });
+//        // on press
+//        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+//                Intent intent = new Intent(Bookmarks.this, WebPageActivity.class);
+//                Uri uri = Uri.parse((links.get(position)).toString());
+//                intent.setData(uri);
+//                startActivity(intent);
+//            }
+//        });
 
         // on press
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -224,4 +260,68 @@ public class Bookmarks extends AppCompatActivity {
         });
 
     }
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
+    public void askConfirmation(String title, String msg,final String result,final Context c) {
+        new AlertDialog.Builder(this)
+                .setTitle(title)
+                .setMessage(msg)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        Toast.makeText(c, result, Toast.LENGTH_SHORT).show();
+                    }})
+                .setNegativeButton(android.R.string.no, null).show();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.bookmarks_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+
+        Cursor cursor = null;
+        switch (item.getItemId()) {
+            case R.id.delete_all:
+                askConfirmation("Confirm", "Are you really want to delete all bookmarks","All entries deleted.", Bookmarks.this);
+                myDb.removeAllEntries();
+                headlines.clear();
+                links.clear();
+                adapter.notifyDataSetChanged();
+                break;
+
+            case R.id.order_by_news:
+                cursor = myDb.getAllDataOrderBy("News");
+                showDataOrderBy(cursor);
+                adapter.notifyDataSetChanged();
+                break;
+            case R.id.order_by_programming:
+                cursor = myDb.getAllDataOrderBy("Programming");
+                showDataOrderBy(cursor);
+                adapter.notifyDataSetChanged();
+                break;
+            case R.id.order_by_show_all:
+                headlines.clear();
+                links.clear();
+                showData();
+                adapter.notifyDataSetChanged();
+                break;
+
+            case R.id.menu_exit:
+                Toast.makeText(this, "Exiting", Toast.LENGTH_LONG);
+                finish();
+        }
+        return true;
+    }
+
+
 }

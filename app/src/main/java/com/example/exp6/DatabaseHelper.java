@@ -119,6 +119,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return res;
     }
 
+    // To view all the data in db
+    public Cursor getAllDataOrderBy(String order) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = null;
+        if (order.equals("News"))
+            cursor=db.rawQuery("SELECT * FROM "+ TABLE_NAME + " WHERE " + COL_3 + " = " + "'News'", null);
+        else if (order.equals("Programming"))
+            cursor=db.rawQuery("SELECT * FROM "+ TABLE_NAME + " WHERE "
+                    + COL_3 + " = " + "'Programming'", null);
+
+        return cursor;
+    }
+
+
 
     // UPDATE DATA
     public boolean updateData(String id, String fname, String lname, int marks) {
