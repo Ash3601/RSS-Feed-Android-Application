@@ -40,14 +40,23 @@ import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
     private ListView listView;
+    private String gNews = "https://news.google.com/news/rss";
     private List headlines;
     private List links;
+    private List oHeadlines;
+    private List oLinks;
+
+    //    private List oHeadlines;
+//    private List oLinks;
     private ProgressDialog nDialog;
     private String platform = "News";
     private EditText mainActivityEditText;
+    private String[] urls = {"https://geeksforgeeks.org/feed", "https://codingconnect.net/feed", "https://www.thecrazyprogrammer.com/feed", "http://www.codingalpha.com/feed", "https://medium.com/feed/better-programming", "https://news.google.com/news?cf=all&hl=en&pz=1&ned=us&q=software+engineering&output=rss"};
+
     DatabaseHelper myDb;
     ArrayAdapter<String> adapter;
     boolean doneLoading = false;
+    private static int urlCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +87,24 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i0, int i1, int i2) {
+                String input = mainActivityEditText.getText().toString();
+                if (input.equals("") == true || input == null) {
+//                    if (platform == "News") {
+//                        new MyAsyncTask(gNews).execute();
+//                    } else if (platform == "Programming") {
+//                        new MyAsyncTask(urls[urlCount]).execute();
+//                    }
+                    headlines.clear();
+                    links.clear();
+                    headlines = oHeadlines;
+                    links = oLinks;
+                    adapter.notifyDataSetChanged();
+//                    overridePendingTransition(0, 0);
+//                    startActivity(getIntent());
+//                    overridePendingTransition(0, 0);
+                    Log.i("inputNull0", "Input : " + input);
+
+                }
             }
 
             @Override
@@ -93,11 +120,17 @@ public class MainActivity extends AppCompatActivity {
                         tmpList2.add(temp2);
                     }
                 }
-                if (input.equals("") == true) {
-                    listView.setAdapter(adapter);
-                    adapter.notifyDataSetChanged();
-                    return;
-                }
+//                if (input.equals("") == true || input == null) {
+//                    headlines.clear();
+//                    links.clear();
+//                    overridePendingTransition(0, 0);
+//                    startActivity(getIntent());
+//                    overridePendingTransition(0, 0);
+//                    Log.i("inputNull", "Input : " + input);
+//                    listView.setAdapter(adapter);
+//                    adapter.notifyDataSetChanged();
+//                    return;
+//                }
                 headlines = tmpList;
                 links = tmpList2;
 
@@ -165,6 +198,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+        nDialog.dismiss();
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+        nDialog.dismiss();
+
+    }
+
+    @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 
 
@@ -181,8 +229,12 @@ public class MainActivity extends AppCompatActivity {
             case R.id.programming:
                 platform = "Programming";
                 if (isNetworkConnected()) {
-                    String[] urls = {"https://geeksforgeeks.org/feed", "https://codingconnect.net/feed"};
-                    new MyAsyncTask(urls[0]).execute();
+                    Toast.makeText(this, "Loading...\n" + urls[urlCount], Toast.LENGTH_LONG).show();
+                    new MyAsyncTask(urls[urlCount]).execute();
+                    urlCount++;
+                    if (urlCount == urls.length) {
+                        urlCount = 0;
+                    }
                 } else {
                     showMessage("Error", "Internet not available.");
                 }
@@ -218,15 +270,19 @@ public class MainActivity extends AppCompatActivity {
         protected ArrayAdapter doInBackground(Object[] params) {
             headlines = new ArrayList();
             links = new ArrayList();
-
+            oHeadlines = new ArrayList();
+            oLinks = new ArrayList();
             try {
                 URL url = new URL(urlEntered);
                 XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
                 factory.setNamespaceAware(false);
                 XmlPullParser xpp = factory.newPullParser();
-
+                try {
                 // We will get the XML from an input stream
-                xpp.setInput(getInputStream(url), "UTF_8");
+                    xpp.setInput(getInputStream(url), "UTF_8");
+                } catch (IllegalArgumentException iae) {
+                    Log.i(iae + "", "Illegal Argument Exception");
+                }
                 boolean insideItem = false;
 
                 // Returns the type of current event: START_TAG, END_TAG, etc..
@@ -236,11 +292,17 @@ public class MainActivity extends AppCompatActivity {
                         if (xpp.getName().equalsIgnoreCase("item")) {
                             insideItem = true;
                         } else if (xpp.getName().equalsIgnoreCase("title")) {
-                            if (insideItem)
-                                headlines.add(xpp.nextText()); //extract the headline
+                            if (insideItem) {
+                                String headline = xpp.nextText();
+                                headlines.add(headline); //extract the headline
+                                oHeadlines.add(headline);
+                            }
                         } else if (xpp.getName().equalsIgnoreCase("link")) {
-                            if (insideItem)
-                                links.add(xpp.nextText()); //extract the link of article
+                            if (insideItem) {
+                                String link = xpp.nextText();
+                                links.add(link); //extract the link of article
+                                oLinks.add(link);
+                            }
                         }
                     } else if (eventType == XmlPullParser.END_TAG && xpp.getName().equalsIgnoreCase("item")) {
                         insideItem = false;

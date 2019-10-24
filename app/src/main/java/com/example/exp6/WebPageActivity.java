@@ -15,6 +15,13 @@ public class WebPageActivity extends AppCompatActivity {
 
     private WebView webView;
 
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
