@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
 
     //    private List oHeadlines;
 //    private List oLinks;
-    private ProgressDialog nDialog;
+    private ProgressDialog nDialog = null;
     private String platform = "News";
     private EditText mainActivityEditText;
     private String[] urls = {"https://geeksforgeeks.org/feed", "https://codingconnect.net/feed", "https://www.thecrazyprogrammer.com/feed", "http://www.codingalpha.com/feed", "https://medium.com/feed/better-programming", "https://news.google.com/news?cf=all&hl=en&pz=1&ned=us&q=software+engineering&output=rss"};
@@ -89,21 +89,11 @@ public class MainActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence charSequence, int i0, int i1, int i2) {
                 String input = mainActivityEditText.getText().toString();
                 if (input.equals("") == true || input == null) {
-//                    if (platform == "News") {
-//                        new MyAsyncTask(gNews).execute();
-//                    } else if (platform == "Programming") {
-//                        new MyAsyncTask(urls[urlCount]).execute();
-//                    }
                     headlines.clear();
                     links.clear();
                     headlines = oHeadlines;
                     links = oLinks;
                     adapter.notifyDataSetChanged();
-//                    overridePendingTransition(0, 0);
-//                    startActivity(getIntent());
-//                    overridePendingTransition(0, 0);
-                    Log.i("inputNull0", "Input : " + input);
-
                 }
             }
 
@@ -201,14 +191,16 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-        nDialog.dismiss();
+        if (nDialog != null)
+            nDialog.dismiss();
     }
 
     @Override
     protected void onPostResume() {
         super.onPostResume();
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-        nDialog.dismiss();
+        if (nDialog != null)
+            nDialog.dismiss();
 
     }
 

@@ -2,13 +2,18 @@ package com.example.exp6;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class WebPageActivity extends AppCompatActivity {
@@ -20,6 +25,46 @@ public class WebPageActivity extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
         finish();
+    }
+
+    // Menu
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_web_view, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        // Creating Share Functionality
+        switch (item.getItemId()) {
+            case R.id.menu_share_button:
+/*          Share Intent
+                Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+                sharingIntent.setType("text/plain");
+                String shareSubject = "Share URL";
+                String shareBody = String.valueOf(getIntent().getData());
+                sharingIntent.putExtra(Intent.EXTRA_TEXT, shareBody);
+                sharingIntent.putExtra(Intent.EXTRA_SUBJECT, shareSubject);
+                startActivity(Intent.createChooser(sharingIntent, "Share URL"));
+               */
+
+                // Share Intent Second Method with open in browser functionality
+                String url = String.valueOf(getIntent().getData());
+                String shareString = url;
+                Intent sendIntent = new Intent(Intent.ACTION_SEND);
+                sendIntent.setType("text/plain");
+                sendIntent.putExtra(Intent.EXTRA_TEXT, shareString);
+                Intent viewIntent = new Intent(Intent.ACTION_VIEW);
+                viewIntent.setData(Uri.parse(url));
+
+                Intent chooserIntent = Intent.createChooser(sendIntent, "Open in...");
+                chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{viewIntent});
+                startActivity(chooserIntent);
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
