@@ -21,8 +21,4 @@
         android:title="Delete all bookmarks"
         app:showAsAction="never"/>
 
-    <item android:id="@+id/menu_exit"
-        android:title="Back"
-        app:showAsAction="never"/>
-
 </menu>

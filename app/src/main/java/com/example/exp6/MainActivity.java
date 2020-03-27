@@ -25,6 +25,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -46,13 +47,14 @@ public class MainActivity extends AppCompatActivity {
     private List links;
     private List oHeadlines;
     private List oLinks;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
 
     //    private List oHeadlines;
 //    private List oLinks;
     private ProgressDialog nDialog = null;
     private String platform = "News";
     private EditText mainActivityEditText;
-    private String[] urls = {"https://geeksforgeeks.org/feed", "https://codingconnect.net/feed", "https://www.thecrazyprogrammer.com/feed", "http://www.codingalpha.com/feed", "https://medium.com/feed/better-programming", "https://news.google.com/news?cf=all&hl=en&pz=1&ned=us&q=software+engineering&output=rss"};
+    private String[] urls = {"https://geeksforgeeks.org/feed", "https://www.thecrazyprogrammer.com/feed", "http://www.codingalpha.com/feed", "https://medium.com/feed/better-programming", "https://news.google.com/news?cf=all&hl=en&pz=1&ned=us&q=software+engineering&output=rss", "https://codingconnect.net/feed",};
 
     DatabaseHelper myDb;
     ArrayAdapter<String> adapter;
@@ -76,8 +78,42 @@ public class MainActivity extends AppCompatActivity {
                 Log.i(e + "", "Exception");
             }
         }
-
+        mSwipeRefreshLayout = findViewById(R.id.swiperefresh);
         listView = findViewById(R.id.list_view);
+
+        // Interface to allow swipe to refresh
+        mSwipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        Log.i("swipeRefresh", "onRefresh called from SwipeRefreshLayout");
+//                        mSwipeRefreshLayout.set
+                        mSwipeRefreshLayout.setRefreshing(false);
+                        if (platform.equals("News")) {
+                            new MyAsyncTask("https://news.google.com/news/rss").execute();
+                            Toast.makeText(MainActivity.this, "News Feed Refreshed!",
+                                    Toast.LENGTH_SHORT).show();
+                        } else {
+                            if (urlCount < 0)
+                                urlCount += 1;
+                            new MyAsyncTask(urls[urlCount - 1]).execute();
+                            Toast.makeText(MainActivity.this, "Feed Refreshed!",
+                                    Toast.LENGTH_SHORT).show();
+
+                        }
+
+//                        finish();
+//                        startActivity(getIntent());
+                        if (nDialog != null) {
+                            nDialog.dismiss();
+                        }
+                        // This method performs the actual data-refresh operation.
+                        // The method calls setRefreshing(false) when it's finished.
+//                        myUpdateOperation();
+                    }
+                }
+        );
+//        addItemsOnRefresh();
 
         // setting add text listener on edit text
         mainActivityEditText = findViewById(R.id.main_activity_edit_text_filter);
@@ -135,6 +171,39 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
+//.setOnRefreshListener(
+//        new SwipeRefreshLayout.OnRefreshListener() {
+//        @Override
+//        public void onRefresh() {
+//            Log.i(LOG_TAG, "onRefresh called from SwipeRefreshLayout");
+//
+//            // This method performs the actual data-refresh operation.
+//            // The method calls setRefreshing(false) when it's finished.
+//            myUpdateOperation();
+//        }
+//    }
+//);
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1) {
+            if (resultCode == MainActivity.RESULT_OK) {
+                String result = data.getStringExtra("isDeletionOccured");
+                if (result.equals("true")) {
+                    // An item is deleted
+                    finish();
+                    startActivity(getIntent());
+                }
+                Log.i("activityRes", result);
+            }
+            if (resultCode == MainActivity.RESULT_CANCELED) {
+                //Write your code if there's no result
+                Log.i("activityRes2", "Result Cancelled");
+            }
+        }
+    }
+
     // Network Connection Test
     private boolean isNetworkConnected() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -189,14 +258,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public void onRestart() {
-        super.onRestart();
-        finish();
-        startActivity(getIntent());
-        //When BACK BUTTON is pressed, the activity on the stack is restarted
-        //Do what you want on the refresh procedure here
-    }
+    //    @Override
+//    public void onRestart() {
+//        super.onRestart();
+//        finish();
+//        startActivity(getIntent());
+//        //When BACK BUTTON is pressed, the activity on the stack is restarted
+//        //Do what you want on the refresh procedure here
+//    }
     @Override
     protected void onPause() {
         super.onPause();
@@ -245,7 +314,9 @@ public class MainActivity extends AppCompatActivity {
             case R.id.menu_bookmarks:
                 Log.i("Showing Bookmarks", "bookmarkstest");
                 Intent bookmarkActivityIntent = new Intent(MainActivity.this, Bookmarks.class);
-                startActivity(bookmarkActivityIntent);
+//                startActivity(bookmarkActivityIntent);
+//                Intent i = new Intent(this, SecondActivity.class);
+                startActivityForResult(bookmarkActivityIntent, 1);
                 break;
 
             case R.id.menu_exit:
@@ -264,23 +335,22 @@ public class MainActivity extends AppCompatActivity {
             this.urlEntered = url;
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                     WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+//            if (nDialog != null) {
+//                nDialog.dismiss();
+//            }
             showSpinner();
         }
 
         @Override
         protected void onPreExecute() {
-            //Start the splash screen dialog
-//            if (pleaseWaitDialog == null)
-//                pleaseWaitDialog= ProgressDialog.show(MainActivity.this,
-//                        "PLEASE WAIT",
-//                        "Getting results...",
-//                        false);
-//        showSpinner();
 
         }
 
         @Override
         protected ArrayAdapter doInBackground(Object[] params) {
+//            if (nDialog != null) {
+//                nDialog.dismiss();
+//            }
             headlines = new ArrayList();
             links = new ArrayList();
             oHeadlines = new ArrayList();
@@ -334,13 +404,20 @@ public class MainActivity extends AppCompatActivity {
             } catch (MalformedURLException e) {
                 e.printStackTrace();
                 Log.i("url Parser", "offline");
+                Toast.makeText(MainActivity.this, "Offline",
+                        Toast.LENGTH_SHORT).show();
             } catch (XmlPullParserException e) {
+                if (nDialog != null) {
+                    nDialog.dismiss();
+                }
                 e.printStackTrace();
                 Log.i("url Parser 2", "offline");
 
             } catch (IOException e) {
                 e.printStackTrace();
                 Log.i("url Parser 3", "offline");
+                Toast.makeText(MainActivity.this, "Offline",
+                        Toast.LENGTH_SHORT).show();
 
             }
             return null;
@@ -351,6 +428,11 @@ public class MainActivity extends AppCompatActivity {
             doneLoading = true;
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
             nDialog.dismiss();
+            if (headlines.size() == 0) {
+                Toast.makeText(MainActivity.this, "Feed is not unavailable/offline",
+                        Toast.LENGTH_SHORT).show();
+
+            }
         }
     }
 

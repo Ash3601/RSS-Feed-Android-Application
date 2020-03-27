@@ -42,7 +42,7 @@ public class Bookmarks extends AppCompatActivity {
     private ArrayAdapter<String> adapter;
     private EditText filer;
     private boolean confirmation = false;
-
+    private boolean isItemDeleted = false;
     private boolean showData() {
         Cursor res = myDb.getAllData();
         if (res.getCount() == 0) {
@@ -123,8 +123,15 @@ public class Bookmarks extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
+//        super.onBackPressed();
 //        onRestart();
+        Intent resIntent = new Intent();
+        if (isItemDeleted)
+            resIntent.putExtra("isDeletionOccured", "true");
+        else
+            resIntent.putExtra("isDeletionOccured", "false");
+
+        setResult(RESULT_OK, resIntent);
         finish();
     }
 
@@ -196,6 +203,7 @@ public class Bookmarks extends AppCompatActivity {
                 links.remove(i);
                 adapter.notifyDataSetChanged();
                 if (isDeleted) {
+                    isItemDeleted = true;
                     if (filer.getText().toString().equals("") == false) {
                         Cursor cursor = myDb.queryData(filer.getText().toString().trim());
                         showData(cursor);
@@ -281,9 +289,9 @@ public class Bookmarks extends AppCompatActivity {
                 adapter.notifyDataSetChanged();
                 break;
 
-            case R.id.menu_exit:
-                Toast.makeText(this, "Exiting", Toast.LENGTH_LONG);
-                finish();
+//            case R.id.menu_exit:
+////                Toast.makeText(this, "Exiting", Toast.LENGTH_LONG);
+////                finish();
         }
         return true;
     }
