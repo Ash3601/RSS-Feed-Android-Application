@@ -448,9 +448,18 @@ public class MainActivity extends AppCompatActivity {
                 String headline = (String) headlines.get(i);
                 String link = (String) links.get(i);
                 boolean isInserted;
+                if (headline.contains("✯ ")) {
+                    headline = headline.substring(2);
+                }
                 boolean isDataPresent = myDb.checkIsDataAlreadyInDBorNot(headline);
                 if (isDataPresent) {
-                    Toast.makeText(MainActivity.this, "Already bookmarked", Toast.LENGTH_LONG).show();
+                    // remove from the database
+                    boolean isDeleted = myDb.deleteData(headline);
+                    if (isDeleted) {
+                        headlines.set(i, headline);
+                        adapter.notifyDataSetChanged();
+                        Toast.makeText(MainActivity.this, "Bookmark Removed", Toast.LENGTH_LONG).show();
+                    }
                     return true;
                 }
                 isInserted = myDb.insertData(headline, link, platform);
