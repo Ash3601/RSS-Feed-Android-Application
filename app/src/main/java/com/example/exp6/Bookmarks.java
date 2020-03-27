@@ -124,8 +124,16 @@ public class Bookmarks extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+//        onRestart();
         finish();
     }
+
+//    @Override
+//    public void onRestart() {
+//        super.onRestart();
+//        //When BACK BUTTON is pressed, the activity on the stack is restarted
+//        //Do what you want on the refresh procedure here
+//    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -80,6 +80,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public boolean checkIsDataAlreadyInDBorNot(String headline) {
         SQLiteDatabase sqldb = this.getWritableDatabase();
         headline = headline.replace("'", "`");
+
+        // check if headline contains ✯
+        if (headline.contains("✯ ")) {
+            headline = headline.substring(2);
+        }
+//        headline = "✯ " + headline;
         Cursor cursor = sqldb.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE headlines = " + "'" + headline + "'", null);
 
         if (cursor.getCount() <= 0) {

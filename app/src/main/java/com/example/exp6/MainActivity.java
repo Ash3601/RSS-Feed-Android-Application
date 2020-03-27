@@ -40,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
     private ListView listView;
+    private static ProgressDialog pleaseWaitDialog;
     private String gNews = "https://news.google.com/news/rss";
     private List headlines;
     private List links;
@@ -48,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
 
     //    private List oHeadlines;
 //    private List oLinks;
-    private ProgressDialog nDialog;
+    private ProgressDialog nDialog = null;
     private String platform = "News";
     private EditText mainActivityEditText;
     private String[] urls = {"https://geeksforgeeks.org/feed", "https://codingconnect.net/feed", "https://www.thecrazyprogrammer.com/feed", "http://www.codingalpha.com/feed", "https://medium.com/feed/better-programming", "https://news.google.com/news?cf=all&hl=en&pz=1&ned=us&q=software+engineering&output=rss"};
@@ -89,21 +90,11 @@ public class MainActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence charSequence, int i0, int i1, int i2) {
                 String input = mainActivityEditText.getText().toString();
                 if (input.equals("") == true || input == null) {
-//                    if (platform == "News") {
-//                        new MyAsyncTask(gNews).execute();
-//                    } else if (platform == "Programming") {
-//                        new MyAsyncTask(urls[urlCount]).execute();
-//                    }
                     headlines.clear();
                     links.clear();
                     headlines = oHeadlines;
                     links = oLinks;
                     adapter.notifyDataSetChanged();
-//                    overridePendingTransition(0, 0);
-//                    startActivity(getIntent());
-//                    overridePendingTransition(0, 0);
-                    Log.i("inputNull0", "Input : " + input);
-
                 }
             }
 
@@ -158,6 +149,7 @@ public class MainActivity extends AppCompatActivity {
         nDialog.setTitle("Loading Feed");
         nDialog.setIndeterminate(false);
         nDialog.setCancelable(false);
+//        return nDialog;
         nDialog.show();
     }
 
@@ -198,17 +190,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onRestart() {
+        super.onRestart();
+        finish();
+        startActivity(getIntent());
+        //When BACK BUTTON is pressed, the activity on the stack is restarted
+        //Do what you want on the refresh procedure here
+    }
+    @Override
     protected void onPause() {
         super.onPause();
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-        nDialog.dismiss();
+//        if (nDialog != null)
+//            nDialog.dismiss();
     }
 
     @Override
     protected void onPostResume() {
         super.onPostResume();
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-        nDialog.dismiss();
+//        if (nDialog != null)
+//            nDialog.dismiss();
 
     }
 
@@ -265,6 +267,17 @@ public class MainActivity extends AppCompatActivity {
             showSpinner();
         }
 
+        @Override
+        protected void onPreExecute() {
+            //Start the splash screen dialog
+//            if (pleaseWaitDialog == null)
+//                pleaseWaitDialog= ProgressDialog.show(MainActivity.this,
+//                        "PLEASE WAIT",
+//                        "Getting results...",
+//                        false);
+//        showSpinner();
+
+        }
 
         @Override
         protected ArrayAdapter doInBackground(Object[] params) {
@@ -294,8 +307,16 @@ public class MainActivity extends AppCompatActivity {
                         } else if (xpp.getName().equalsIgnoreCase("title")) {
                             if (insideItem) {
                                 String headline = xpp.nextText();
+                                boolean isDataPresent = myDb.checkIsDataAlreadyInDBorNot(headline);
+                                // ✯
+                                if (isDataPresent) {
+                                    headline = "✯ " + headline;
+                                    System.out.println("Current headline " + headline);
+                                }
                                 headlines.add(headline); //extract the headline
+
                                 oHeadlines.add(headline);
+
                             }
                         } else if (xpp.getName().equalsIgnoreCase("link")) {
                             if (insideItem) {
@@ -352,6 +373,11 @@ public class MainActivity extends AppCompatActivity {
                 }
                 isInserted = myDb.insertData(headline, link, platform);
                 Log.i("On item long clicked", "clickCheck");
+                String new_headline = "✯ " + headline;
+                headlines.set(i, new_headline);
+
+//                headlines.set(1, "testing testing testing");
+                adapter.notifyDataSetChanged();
                 if (!isInserted) {
                     Toast.makeText(MainActivity.this, "Already Added to Bookmark", Toast.LENGTH_LONG).show();
                     return false;
