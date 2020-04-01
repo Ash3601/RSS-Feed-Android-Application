@@ -377,6 +377,9 @@ public class MainActivity extends AppCompatActivity {
                         } else if (xpp.getName().equalsIgnoreCase("title")) {
                             if (insideItem) {
                                 String headline = xpp.nextText();
+                                if (headline.contains("'")) {
+                                    headline = headline.replace("'", "`");
+                                }
                                 boolean isDataPresent = myDb.checkIsDataAlreadyInDBorNot(headline);
                                 // ✯
                                 if (isDataPresent) {

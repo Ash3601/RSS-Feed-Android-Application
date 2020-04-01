@@ -172,9 +172,11 @@ public class Bookmarks extends AppCompatActivity {
             public void afterTextChanged(Editable editable) {
                 Cursor cursor = myDb.queryData(filer.getText().toString().trim());
                 showData(cursor);
-                adapter = new ArrayAdapter<String>(Bookmarks.this, android.R.layout.simple_list_item_1, headlines);
-                listView.setAdapter(adapter);
-
+                Collections.reverse(headlines);
+                Collections.reverse(links);
+//                adapter = new ArrayAdapter<String>(Bookmarks.this, android.R.layout.simple_list_item_1, headlines);
+//                listView.setAdapter(adapter);
+                adapter.notifyDataSetChanged();
             }
         });
 
