@@ -17,8 +17,31 @@
                 app:showAsAction="never"/>
         </menu>
     </item>
-    <item android:id="@+id/delete_all"
-        android:title="Delete all bookmarks"
-        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/delete"
+        android:title="Delete"
+        android:showAsAction="never">
+
+        <menu>
+            <item
+                android:id="@+id/delete_news"
+                android:title="Delete All News Bookmarks"
+                app:showAsAction="" />
+            <item
+                android:id="@+id/delete_programming"
+                android:title="Delete Programming Bookmarks"
+                app:showAsAction="never" />
+            <item
+                android:id="@+id/delete_all"
+                android:title="Delete all bookmarks"
+                app:showAsAction="never" />
+        </menu>
+    </item>
+
+
+    <!--    <item android:id="@+id/delete_all"-->
+    <!--        android:title="Delete all bookmarks"-->
+    <!--        app:showAsAction="never"/>-->
 
 </menu>

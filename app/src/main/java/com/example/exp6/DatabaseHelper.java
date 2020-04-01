@@ -6,7 +6,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -69,10 +68,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     // Delete all the entries from the database
-    public void removeAllEntries() {
+    public boolean removeAllEntries(String platform) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.execSQL("DELETE FROM " + TABLE_NAME);
-        Log.i("All entries deleted", "removeAllEntries");
+
+        if (platform.equals("All")) {
+//            db.execSQL("DELETE FROM " + TABLE_NAME);
+            return db.delete(TABLE_NAME, "platform=?", new String[]{platform}) > 0;
+//            return;
+        }
+//        db.execSQL("DELETE FROM " + TABLE_NAME + " WHERE platform=" + "'" + platform + "'");
+        return db.delete(TABLE_NAME, "platform=?", new String[]{platform}) > 0;
+//        Log.i("All entries deleted", "removeAllEntries");
     }
 
 
@@ -135,5 +141,4 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         int isDeleted = db.delete(TABLE_NAME, "headlines = ?", new String[]{id});
         return isDeleted != 0;
     }
-
 }

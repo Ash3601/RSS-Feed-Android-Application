@@ -30,6 +30,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Bookmarks extends AppCompatActivity {
@@ -43,6 +44,7 @@ public class Bookmarks extends AppCompatActivity {
     private EditText filer;
     private boolean confirmation = false;
     private boolean isItemDeleted = false;
+
     private boolean showData() {
         Cursor res = myDb.getAllData();
         if (res.getCount() == 0) {
@@ -55,6 +57,8 @@ public class Bookmarks extends AppCompatActivity {
             headlines.add(res.getString(0));
             links.add(res.getString(1));
         }
+        Collections.reverse(headlines);
+        Collections.reverse(links);
         return true;
     }
 
@@ -90,6 +94,9 @@ public class Bookmarks extends AppCompatActivity {
             headlines.add(res.getString(0));
             links.add(res.getString(1));
         }
+        Collections.reverse(headlines);
+        Collections.reverse(links);
+
         return true;
     }
 
@@ -123,8 +130,6 @@ public class Bookmarks extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-//        super.onBackPressed();
-//        onRestart();
         Intent resIntent = new Intent();
         if (isItemDeleted)
             resIntent.putExtra("isDeletionOccured", "true");
@@ -134,13 +139,6 @@ public class Bookmarks extends AppCompatActivity {
         setResult(RESULT_OK, resIntent);
         finish();
     }
-
-//    @Override
-//    public void onRestart() {
-//        super.onRestart();
-//        //When BACK BUTTON is pressed, the activity on the stack is restarted
-//        //Do what you want on the refresh procedure here
-//    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -229,7 +227,7 @@ public class Bookmarks extends AppCompatActivity {
         return true;
     }
 
-    public boolean askConfirmation(String title, String msg, final String result, final Context c) {
+    public boolean askConfirmation(String title, String msg, final String result, final Context c, final String platform) {
 
         new AlertDialog.Builder(this)
                 .setTitle(title)
@@ -239,11 +237,14 @@ public class Bookmarks extends AppCompatActivity {
 
                     public void onClick(DialogInterface dialog, int whichButton) {
                         confirmation = true;
-                        myDb.removeAllEntries();
-                        headlines.clear();
-                        links.clear();
-                        adapter.notifyDataSetChanged();
-                        Toast.makeText(c, result, Toast.LENGTH_SHORT).show();
+                        if (myDb.removeAllEntries(platform)) {
+                            headlines.clear();
+                            links.clear();
+                            adapter.notifyDataSetChanged();
+                            Toast.makeText(c, result, Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(c, "No entries found!", Toast.LENGTH_LONG).show();
+                        }
                     }
                 })
                 .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
@@ -269,8 +270,17 @@ public class Bookmarks extends AppCompatActivity {
         Cursor cursor;
         switch (item.getItemId()) {
             case R.id.delete_all:
-                askConfirmation("Confirm", "Are you really want to delete all bookmarks", "All entries deleted.", Bookmarks.this);
+                askConfirmation("Confirm", "Do you really want to delete all bookmarks?", "All entries deleted.", Bookmarks.this, "All");
                 break;
+
+            case R.id.delete_news:
+                askConfirmation("Confirm", "Do you really want to delete all news bookmarks?", "All news entries deleted.", Bookmarks.this, "News");
+                break;
+
+            case R.id.delete_programming:
+                askConfirmation("Confirm", "Do you really want to delete all programming bookmarks?", "All programming entries deleted.", Bookmarks.this, "Programming");
+                break;
+
 
             case R.id.order_by_news:
                 cursor = myDb.getAllDataOrderBy("News");
@@ -289,9 +299,6 @@ public class Bookmarks extends AppCompatActivity {
                 adapter.notifyDataSetChanged();
                 break;
 
-//            case R.id.menu_exit:
-////                Toast.makeText(this, "Exiting", Toast.LENGTH_LONG);
-////                finish();
         }
         return true;
     }
