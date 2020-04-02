@@ -44,6 +44,7 @@ public class Bookmarks extends AppCompatActivity {
     private EditText filer;
     private boolean confirmation = false;
     private boolean isItemDeleted = false;
+    private static String globalPlatform = "All";
 
     private boolean showData() {
         Cursor res = myDb.getAllData();
@@ -170,7 +171,7 @@ public class Bookmarks extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                Cursor cursor = myDb.queryData(filer.getText().toString().trim());
+                Cursor cursor = myDb.queryData(filer.getText().toString().trim(), globalPlatform);
                 showData(cursor);
                 Collections.reverse(headlines);
                 Collections.reverse(links);
@@ -205,7 +206,8 @@ public class Bookmarks extends AppCompatActivity {
                 if (isDeleted) {
                     isItemDeleted = true;
                     if (filer.getText().toString().equals("") == false) {
-                        Cursor cursor = myDb.queryData(filer.getText().toString().trim());
+                        globalPlatform = "All";
+                        Cursor cursor = myDb.queryData(filer.getText().toString().trim(), globalPlatform);
                         showData(cursor);
                         Toast.makeText(Bookmarks.this, "Deleted", Toast.LENGTH_SHORT).show();
 
@@ -285,16 +287,19 @@ public class Bookmarks extends AppCompatActivity {
 
 
             case R.id.order_by_news:
+                globalPlatform = "News";
                 cursor = myDb.getAllDataOrderBy("News");
                 showDataOrderBy(cursor);
                 adapter.notifyDataSetChanged();
                 break;
             case R.id.order_by_programming:
+                globalPlatform = "Programming";
                 cursor = myDb.getAllDataOrderBy("Programming");
                 showDataOrderBy(cursor);
                 adapter.notifyDataSetChanged();
                 break;
             case R.id.order_by_show_all:
+                globalPlatform = "All";
                 headlines.clear();
                 links.clear();
                 showData();

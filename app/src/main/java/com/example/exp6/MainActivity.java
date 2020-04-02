@@ -163,6 +163,7 @@ public class MainActivity extends AppCompatActivity {
 
                 ArrayAdapter<String> myAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, tmpList);
                 listView.setAdapter(myAdapter);
+
                 myAdapter.notifyDataSetChanged();
 
 

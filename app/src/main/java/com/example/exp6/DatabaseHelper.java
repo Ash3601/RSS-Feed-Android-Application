@@ -59,11 +59,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     }
 
-    public Cursor queryData(String queryField) {
+    public Cursor queryData(String queryField, String platform) {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor;
+        if (platform.equals("All")) {
+            cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE "
+                    + COL_1 + " LIKE '%" + queryField + "%'", null);
+            return cursor;
+        }
         cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE "
-                + COL_1 + " LIKE '%" + queryField + "%'", null);
+                + COL_1 + " LIKE '%" + queryField + "%'" + " AND platform=" + "'" + platform + "'", null);
         return cursor;
     }
 
@@ -72,9 +77,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         if (platform.equals("All")) {
-//            db.execSQL("DELETE FROM " + TABLE_NAME);
-            return db.delete(TABLE_NAME, "platform=?", new String[]{platform}) > 0;
-//            return;
+            db.execSQL("DELETE FROM " + TABLE_NAME);
+//            return db.delete(TABLE_NAME, null, null);
+            return true;
         }
 //        db.execSQL("DELETE FROM " + TABLE_NAME + " WHERE platform=" + "'" + platform + "'");
         return db.delete(TABLE_NAME, "platform=?", new String[]{platform}) > 0;
