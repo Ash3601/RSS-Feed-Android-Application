@@ -27,6 +27,12 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -36,7 +42,9 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
@@ -48,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
     private List oHeadlines;
     private List oLinks;
     private SwipeRefreshLayout mSwipeRefreshLayout;
-
+    private Object mGoogleSignInClient;
     //    private List oHeadlines;
 //    private List oLinks;
     private ProgressDialog nDialog = null;
@@ -61,13 +69,87 @@ public class MainActivity extends AppCompatActivity {
     boolean doneLoading = false;
     private static int urlCount = 0;
 
+    static void reverse(String[] a, int n) {
+        String[] b = new String[n];
+        int j = n;
+        for (int i = 0; i < n; i++) {
+            b[j - 1] = a[i];
+            j = j - 1;
+        }
+
+        /*printing the reversed array*/
+        System.out.println("Reversed array is: \n");
+        for (int k = 0; k < n; k++) {
+            System.out.println(b[k]);
+        }
+    }
+
+    private void collectPhoneNumbers(Map<String, Object> users) {
+
+        ArrayList<String> phoneNumbers = new ArrayList<>();
+
+        //iterate through each user, ignoring their UID
+        for (Map.Entry<String, Object> entry : users.entrySet()) {
+
+            //Get user map
+            Map singleUser = (Map) entry.getValue();
+            //Get phone field and append to list
+            phoneNumbers.add((String) singleUser.get("feed"));
+            System.out.println("Print function test");
+
+            System.out.println(singleUser.get("feed").toString());
+        }
+        urls = new String[phoneNumbers.size()];
+        int i = 0;
+        Collections.reverse(phoneNumbers);
+//        reverse(urls, urls.length);
+        for (String url : phoneNumbers) {
+            urls[i++] = url;
+        }
+
+        System.out.println("Printing urls");
+        for (String url : urls) {
+            System.out.println(url);
+        }
+
+        System.out.println(phoneNumbers.toString());
+    }
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         myDb = new DatabaseHelper(this);
-        if (isNetworkConnected())
+        // Configure sign-in to request the user's ID, email address, and basic
+        // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
+//        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+//                .requestEmail()
+//                .build();
+        // Build a GoogleSignInClient with the options specified by gso.
+//        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+//        SignInButton signInButton = findViewById(R.id.menu_signin);
+//        findViewById(R.id.menu_signin).setOnClickListener(this);
+
+
+        if (isNetworkConnected()) {
+            DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("feeds");
+            ref.addListenerForSingleValueEvent(
+                    new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            //Get map of users in datasnapshot
+                            collectPhoneNumbers((Map<String, Object>) dataSnapshot.getValue());
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            //handle databaseError
+                        }
+                    });
+
             new MyAsyncTask("https://news.google.com/news/rss").execute();
+        }
         else {
             showMessage("Error", "Internet not available.");
             try {
@@ -114,6 +196,7 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 //        addItemsOnRefresh();
+//        findViewById(R.id.menu_signin).setOnClickListener(MainActivity.this);
 
         // setting add text listener on edit text
         mainActivityEditText = findViewById(R.id.main_activity_edit_text_filter);
@@ -320,6 +403,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(bookmarkActivityIntent, 1);
                 break;
 
+
             case R.id.menu_exit:
                 Toast.makeText(this, "Exiting", Toast.LENGTH_LONG);
                 finish();
@@ -362,7 +446,7 @@ public class MainActivity extends AppCompatActivity {
                 factory.setNamespaceAware(false);
                 XmlPullParser xpp = factory.newPullParser();
                 try {
-                // We will get the XML from an input stream
+                    // We will get the XML from an input stream
                     xpp.setInput(getInputStream(url), "UTF_8");
                 } catch (IllegalArgumentException iae) {
                     Log.i(iae + "", "Illegal Argument Exception");
